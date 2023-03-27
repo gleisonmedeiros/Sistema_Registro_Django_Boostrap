@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h4><p>Preencha os campos abaixo:</p></h4>
+
+
+    {% if susesso %}
+        <div class="alert alert-success" role="alert">
+            informações salvas com sucesso
+        </div>
+    {% elif susesso == False %}
+        <div class="alert alert-danger" role="alert">
+            Falha ao salvar as informações !!!
+        </div>
+    {% endif %}
+
+     {% if alerta %}
+        <div class="alert alert-success" role="alert">
+            Cadastro excluído com sucesso
+        </div>
+      {% endif %}
+
+
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if salvar  %}
+            <button type="submit" class="btn btn-primary" action="voltarAoTopo()">Salvar</button>
+        {% endif %}
+    </form>
+
+    {% if editar %}
+        <form method="post" action="{% url 'excluir' id %}">
+            {% csrf_token %}
+            <a href="{% url 'excluir' id %}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir?')">Excluir</a>
+        </form>
+    {% endif %}
+
+
+<p style="line-height: 5;">&nbsp; </p>
+
+{% endblock %}

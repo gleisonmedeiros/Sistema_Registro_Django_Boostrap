@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h3>Selecione abaixo o arquivo para importação:</h3>
+    <p style="line-height: 2;">&nbsp; </p>
+    <form action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="file">Escolha um arquivo:</label>
+            <div class="col-md-6">
+                <input class="col-md-6" type="file" name="xlsx_file" id="xlsx_file">
+            </div>
+        </div>
+        <p style="line-height: 1;">&nbsp; </p>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+
+    {% if result %}
+        <div class="alert alert-info" role="alert">
+            Arquivo importado com sucesso!!
+        </div>
+    {% endif %}
+
+    {% if result == False %}
+        <div class="alert alert-danger" role="alert">
+            Falha na importação do arquivo
+        </div>
+    {% endif %}
+
+{% endblock %}

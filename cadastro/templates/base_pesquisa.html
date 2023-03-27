@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <p style="line-height: 1;">&nbsp; </p>
+  <div class="dropdown">
+    <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+      Pesquisar por...
+    </a>
+
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+      <li><a class="dropdown-item" href="{% url 'pesquisa_string' %}">Requerente</a></li>
+      <li><a class="dropdown-item" href="{% url 'pesquisa_numero' %}">Número do Processo</a></li>
+      <li><a class="dropdown-item" href="{% url 'novapesquisa' %}">Data</a></li>
+    </ul>
+  </div>
+
+ <p style="line-height: 1;">&nbsp; </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-primary" >Pesquisar</button>
+    </form>
+
+    {% if results %}
+
+        <ul>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Requerente</th>
+                        <th scope="col">Assunto</th>
+                        <th scope="col">Nº Processo</th>
+                        <th scope="col">Ano</th>
+                        <th scope="col">Data Processo</th>
+                        <th scope="col">Data Recebimento</th>
+                        <th scope="col">Responsável</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        <tr id={{ result.id  }} data-href="{% url 'editar_cadastro' result.id %}" >
+                            <td>{{ result.id }}</a></td>
+                            <td >{{ result.requerente }}</td>
+                            <td>{{ result.assunto }}</td>
+                            <td>{{ result.numero_do_processo }}</td>
+                            <td>{{ result.ano }}</td>
+                            <td>{{ result.data_do_processo }}</td>
+                            <td>{{ result.data_do_recebimento }}</td>
+                            <td>{{ result.responsavel }}</td>
+                            <td>{{ result.status }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+         </ul>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $('tr').click(function() {
+                    var id = $(this).attr('id');
+                    console.log('ID da linha selecionada: ' + id);
+                });
+            });
+
+            var linhasTabela = document.querySelectorAll('table tr');
+
+              // Adiciona um evento de clique para cada linha da tabela
+              linhasTabela.forEach(function(linha) {
+                linha.addEventListener('click', function() {
+                  // Obtem o valor do atributo "data-href" da linha clicada
+                  var destino = this.dataset.href;
+
+                  // Redireciona o usuário para a página de destino
+                  window.location.href = destino;
+                });
+  });
+        </script>
+
+        <script>
+
+        </script>
+
+        <p style="line-height: 5;">&nbsp; </p>
+    {% endif %}
+
+
+{% endblock %}
