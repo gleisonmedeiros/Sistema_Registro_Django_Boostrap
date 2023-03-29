@@ -54,6 +54,8 @@ def cadastro(request):
 
         post_data = request.POST.copy()
 
+        print(post_data)
+
         post_data['data_do_processo'] = corrigi_data(data_do_processo)
 
         data_do_recebimento = request.POST.get('data_do_recebimento')
@@ -253,10 +255,21 @@ def upload(request):
 
             # Acesse as folhas do arquivo e faça algo com os dados
             sheet = workbook.active
-            for row in sheet.iter_rows(values_only=True):
-                # Fazer algo com os dados da linha
-                pass
 
+            for row in sheet.iter_rows(values_only=True):
+                print(row)
+                print(type(row))
+
+            formulario = Cadastro(requerente='teste2',
+                assunto='Rodrigo',
+                numero_do_processo='2342424',
+                ano=2023,
+                data_do_processo='2022-01-02',
+                data_do_recebimento='2022-02-02',
+                responsavel='Prefeitura',
+                status='Concluído')
+
+            formulario.save()
             # Renderiza uma resposta com uma mensagem de sucesso
             return render(request, 'upload.html',{'result':result})
     return render(request, 'upload.html', {'result': result})
