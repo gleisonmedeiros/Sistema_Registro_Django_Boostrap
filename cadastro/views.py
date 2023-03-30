@@ -1,24 +1,36 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .forms import CadastroForm, Pesquisaform , Dataform, Pesquisaform_numero, LoginForm
+from django.http import HttpResponse, HttpResponseNotFound
+from django.core.exceptions import ObjectDoesNotExist
+from .forms import CadastroForm, \
+    Pesquisaform, \
+    Dataform, \
+    Pesquisaform_numero, \
+    LoginForm
+
 from .models import Cadastro
 from django.db.models import Q
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate, \
+    login as auth_login, \
+    logout as auth_logout
+
 from openpyxl import load_workbook
 import os
 
+
 def teste(request):
     return HttpResponse('olá galera')
+
 
 @login_required
 def home(request):
     username = ''
     if request.user.is_authenticated:
         username = request.user
-    return render(request,'home.html',{'username':username})
+    return render(request, 'home.html', {'username': username})
 
-#Inverte a data para Ano - Mes - dia
+
+# Inverte a data para Ano - Mes - dia
 def corrigi_data(data):
 
     dia = data[:2]
@@ -27,25 +39,28 @@ def corrigi_data(data):
 
     return ano+'-'+mes+'-'+dia
 
-#Salva no banco o formulário se for válido
+
+# Salva no banco o formulário se for válido
 def salvar_formulario(formulario, dicionario, CadastroForm):
     if formulario.is_valid():
-        print("salveiii")
         formulario.save()
         dicionario['susesso'] = True
 
         formulario = CadastroForm()
     else:
-        print('formulario não é válido')
         dicionario['susesso'] = False
+        dicionario['campo'], dicionario['mensagem'] = formulario.errors.as_data().popitem()
 
-#Salva o formulário no Banco
+
+# Salva o formulário no Banco
 @login_required
 def cadastro(request):
     dicionario = {}
+    dicionario['campo'] = None
+    dicionario['mensagem'] = None
     dicionario['editar'] = False
     dicionario['susesso'] = None
-    dicionario ['salvar'] = True
+    dicionario['salvar'] = True
     dicionario['editar'] = False
     dicionario['id'] = 0
     if request.method == 'POST':
@@ -53,8 +68,6 @@ def cadastro(request):
         data_do_processo = request.POST.get('data_do_processo')
 
         post_data = request.POST.copy()
-
-        print(post_data)
 
         post_data['data_do_processo'] = corrigi_data(data_do_processo)
 
@@ -75,11 +88,13 @@ def cadastro(request):
 
     return render(request, 'cadastro.html', dicionario)
 
+
 @login_required
 def pesquisa(request):
     return render(request, 'base_pesquisa.html')
 
-#Pesquisa por data de inicio e fim
+
+# Pesquisa por data de inicio e fim
 @login_required
 def novapesquisa(request):
     if request.method == 'GET':
@@ -96,20 +111,22 @@ def novapesquisa(request):
             data_inicial = form.data['data_inicio']
             data_final = form.data['data_fim']
 
-            results = Cadastro.objects.filter(Q(data_do_recebimento__gte=corrigi_data(data_inicial)) & Q(
-                    data_do_recebimento__lte=corrigi_data(data_final)))
+            results = Cadastro.objects.filter(Q(
+                data_do_recebimento__gte=corrigi_data(data_inicial)) & Q(
+                data_do_recebimento__lte=corrigi_data(data_final)))
 
             context = {'form': form, 'results': results}
             context['username'] = request.user
             return render(request, 'base_pesquisa.html', context)
 
-#Pesquisa por nome
+
+# Pesquisa por nome
 @login_required
 def pesquisa_string(request):
     if request.method == 'GET':
 
         form = Pesquisaform
-        context = {'form':form}
+        context = {'form': form}
         return render(request, 'base_pesquisa.html', context)
 
     if (request.method == 'POST'):
@@ -124,14 +141,21 @@ def pesquisa_string(request):
             context = {'form': form, 'results': results}
             context['username'] = request.user
             return render(request, 'base_pesquisa.html', context)
+    else:
+        results = Cadastro.objects.all
 
-#Pesquisa por número de processo
+        context = {'form': form, 'results': results}
+        context['username'] = request.user
+        return render(request, 'base_pesquisa.html', context)
+
+
+# Pesquisa por número de processo
 @login_required
 def pesquisa_numero(request):
     if request.method == 'GET':
 
         form = Pesquisaform_numero
-        context = {'form':form}
+        context = {'form': form}
         return render(request, 'base_pesquisa.html', context)
 
     if (request.method == 'POST'):
@@ -141,7 +165,8 @@ def pesquisa_numero(request):
 
         if form.is_valid():
 
-            results = Cadastro.objects.filter(numero_do_processo__icontains=query)
+            results = Cadastro.objects.filter(
+                numero_do_processo__icontains=query)
 
             context = {'form': form, 'results': results}
             context['username'] = request.user
@@ -150,17 +175,19 @@ def pesquisa_numero(request):
 
 @login_required
 def editar_cadastro(request, variavel):
-        dicionario = {}
-        dicionario['susesso'] = None
-        dicionario['editar'] = True
-        dicionario['salvar'] = True
+    dicionario = {}
+    dicionario['susesso'] = None
+    dicionario['editar'] = True
+    dicionario['salvar'] = True
 
+    try:
         objeto = Cadastro.objects.get(id=variavel)
+    except ObjectDoesNotExist:
+        return render(request, 'cadastro.html', {'susesso':False, 'mensagem':'Cadastro não encontrado'})
+    else:
 
         form = CadastroForm(instance=objeto)
         dicionario['form'] = form
-
-        id = request.POST.get('data_inicios')
 
         dicionario['id'] = variavel
 
@@ -177,34 +204,37 @@ def editar_cadastro(request, variavel):
 
             data_do_recebimento = request.POST.get('data_do_recebimento')
 
-            post_data['data_do_recebimento'] = corrigi_data(data_do_recebimento)
+            post_data['data_do_recebimento'] = corrigi_data(
+                data_do_recebimento)
 
             formulario = CadastroForm(post_data, instance=objeto)
 
             salvar_formulario(formulario, dicionario, CadastroForm)
 
-            dicionario['form'] =  CadastroForm()
+            dicionario['form'] = CadastroForm()
 
             dicionario['username'] = request.user
             return render(request, 'cadastro.html', dicionario)
 
+
 @login_required
 def excluir(request, variavel):
-    print('entrei na excluir'+str(variavel))
 
-    objeto = Cadastro.objects.get(id=variavel)
+    try:
+        objeto = Cadastro.objects.get(id=variavel)
+    except ObjectDoesNotExist:
+        return render(request, 'cadastro.html', {'susesso': False, 'mensagem': 'Cadastro não encontrado'})
+    else:
 
-    objeto.delete()
-    return render(request, 'cadastro.html',{'alerta':True})
+        objeto.delete()
+        return render(request, 'cadastro.html', {'alerta': True})
+
 
 def log_in(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         username = request.POST['username']
         password = request.POST['password']
-        print(username)
-        print(password)
-        print(request.user)
 
         user = authenticate(username=username, password=password)
 
@@ -215,13 +245,12 @@ def log_in(request):
             if user is not None:
                 sucesso = False
                 auth_login(request, user)
-                print(request.user)
                 return redirect('/registro/home')
             else:
                 sucesso = True
-                print("Usuário inválido")
                 # Exibir uma mensagem de erro se a autenticação falhar
-                return render(request, 'login.html', {'form': form, 'sucesso':sucesso})
+                return render(request, 'login.html',
+                              {'form': form, 'sucesso': sucesso})
     else:
         # Se for um pedido GET, exibir o formulário de login vazio
         form = LoginForm()
@@ -230,46 +259,77 @@ def log_in(request):
 
 def logout(request):
     auth_logout(request)
-    print('tentei logout')
     return redirect('/registro/login')
+
 
 @login_required
 def upload(request):
     result = None
     if (request.method == 'GET'):
         return render(request, 'upload.html')
+    
     elif request.method == 'POST':
 
         # Obtém o arquivo enviado através da solicitação POST
-        file = request.FILES['xlsx_file']
-
-        valid_extensions = ['.xls', '.xlsx']
-        ext = os.path.splitext(file.name)[1]
-        if not ext.lower() in valid_extensions:
+        try:
+            file = request.FILES['xlsx_file']
+        except:
             result = False
+            return render(request, 'upload.html', {'result': result})
         else:
-            result = True
+            # Verifica se 
+            try:
+                wb = load_workbook(filename=file)
+            except:
+                result = False
+                return render(request, 'upload.html', {'result': result})
+            else:
+                # Selecionar a primeira planilha
+                ws = wb.active
 
-            # Carrega o arquivo com a biblioteca openpyxl
-            workbook = load_workbook(file)
+                # Ler a primeira linha
+                first_row = [cell.value for cell in ws[1]]
 
-            # Acesse as folhas do arquivo e faça algo com os dados
-            sheet = workbook.active
+                # Verificar se a primeira célula contém o nome "requerente"
+                if first_row[0] == 'Requerente ':
+                    result = True
+                    valid_extensions = ['.xls', '.xlsx']
+                    ext = os.path.splitext(file.name)[1]
 
-            for row in sheet.iter_rows(values_only=True):
-                print(row)
-                print(type(row))
+                    if not ext.lower() in valid_extensions:
+                        result = False
+                    else:
+                        result = True
 
-            formulario = Cadastro(requerente='teste2',
-                assunto='Rodrigo',
-                numero_do_processo='2342424',
-                ano=2023,
-                data_do_processo='2022-01-02',
-                data_do_recebimento='2022-02-02',
-                responsavel='Prefeitura',
-                status='Concluído')
+                        # Carrega o arquivo com a biblioteca openpyxl
+                        workbook = load_workbook(file)
 
-            formulario.save()
-            # Renderiza uma resposta com uma mensagem de sucesso
-            return render(request, 'upload.html',{'result':result})
-    return render(request, 'upload.html', {'result': result})
+                        # Acesse as folhas do arquivo e faça algo com os dados
+                        sheet = workbook.active
+
+                        dicionario = {}
+
+                        for row in sheet.iter_rows(values_only=True):
+                            if (row[0] == 'Requerente '):
+                                continue
+
+                            formulario = Cadastro(
+                                requerente=row[0],
+                                assunto=row[1],
+                                numero_do_processo=row[2],
+                                ano=row[3],
+                                data_do_processo=row[4],
+                                data_do_recebimento=row[5],
+                                responsavel=row[6],
+                                status=row[7],
+                                destino=row[8])
+
+                            formulario.save()
+
+                        # Renderiza uma resposta com uma mensagem de sucesso
+                        return render(request, 'upload.html', {'result': result})
+                else:
+                    result = False
+                    return render(request, 'upload.html', {'result': result})
+
+            return render(request, 'upload.html', {'result': result})

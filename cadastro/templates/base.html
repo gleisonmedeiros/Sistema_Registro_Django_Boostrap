@@ -30,7 +30,7 @@
     </script>
     <body>
 
-        <nav class="navbar navbar-expand-md" style="background-color: #0D6EFD">
+        <nav class="navbar navbar-expand-md fixed-top" style="background-color: #0D6EFD">
 
             <div class="container-fluid">
 
@@ -41,7 +41,7 @@
                 <ul class="dropdown-menu ">
                     <li><a class="dropdown-item" href="{% url 'cadastro' %}" >Cadastro</a></li>
                     <li><a class="dropdown-item" href="{% url 'pesquisa' %}">Pesquisa</a></li>
-                    <li><a class="dropdown-item" href="{% url 'upload' %}">upload</a></li>
+                    <li><a class="dropdown-item" href="{% url 'upload' %}">Importar</a></li>
                 </ul>
 
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -54,6 +54,8 @@
 
             </div>
         </nav>
+
+        <p style="line-height: 3;">&nbsp; </p>
 
         {% block content %}
 

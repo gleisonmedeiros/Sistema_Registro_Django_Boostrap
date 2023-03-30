@@ -2,6 +2,9 @@
 
 {% block content %}
 
+
+</script>
+
     <h4><p>Preencha os campos abaixo:</p></h4>
 
 
@@ -11,7 +14,7 @@
         </div>
     {% elif susesso == False %}
         <div class="alert alert-danger" role="alert">
-            Falha ao salvar as informações !!!
+            {{ campo }}{{ mensagem }}
         </div>
     {% endif %}
 
