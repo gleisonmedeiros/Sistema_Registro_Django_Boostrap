@@ -13,5 +13,6 @@ urlpatterns = [
     path('excluir/<int:variavel>/', views.excluir, name='excluir'),
     path('login/', views.log_in, name='login'),
     path('logout/', views.logout, name='logout'),
-    path('upload/', views.upload, name='upload')
+    path('upload/', views.upload, name='upload'),
+    path('anexo/<int:id>/', views.anexo, name='anexo'),
 ]

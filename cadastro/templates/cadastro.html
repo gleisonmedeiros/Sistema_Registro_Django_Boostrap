@@ -2,11 +2,7 @@
 
 {% block content %}
 
-
-</script>
-
     <h4><p>Preencha os campos abaixo:</p></h4>
-
 
     {% if susesso %}
         <div class="alert alert-success" role="alert">
@@ -23,8 +19,6 @@
             Cadastro excluído com sucesso
         </div>
       {% endif %}
-
-
 
     <form method="post">
         {% csrf_token %}

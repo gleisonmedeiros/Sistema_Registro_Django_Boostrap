@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if sucesso %}
+    <div class="alert alert-success" role="alert">
+        Salvo com sucesso!!
+    </div>
+{% endif %}
+
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% if not sucesso %}
+        <button type="submit">Salvar</button>
+    {% endif %}
+</form>
+
+ {% for cad in cadastro %}
+    <h2>{{ cad.requerente }}</h2>
+    {% for imagem in cad.imagem_set.all %}
+        <img src="{{ imagem.imagem.url }}" alt="Imagem">
+    {% endfor %}
+{% endfor %}
+
+   <p style="line-height: 5;">&nbsp; </p>
+
+{% endblock %}

@@ -6,9 +6,10 @@ from .forms import CadastroForm, \
     Pesquisaform, \
     Dataform, \
     Pesquisaform_numero, \
-    LoginForm
+    LoginForm, \
+    Cadastro_imagem_Form
 
-from .models import Cadastro
+from .models import Cadastro, Imagem
 from django.db.models import Q
 from django.contrib.auth import authenticate, \
     login as auth_login, \
@@ -43,6 +44,7 @@ def corrigi_data(data):
 # Salva no banco o formulário se for válido
 def salvar_formulario(formulario, dicionario, CadastroForm):
     if formulario.is_valid():
+
         formulario.save()
         dicionario['susesso'] = True
 
@@ -66,6 +68,10 @@ def cadastro(request):
     if request.method == 'POST':
 
         data_do_processo = request.POST.get('data_do_processo')
+
+        images = request.FILES.get('images')
+
+        print(images)
 
         post_data = request.POST.copy()
 
@@ -187,6 +193,7 @@ def editar_cadastro(request, variavel):
     else:
 
         form = CadastroForm(instance=objeto)
+
         dicionario['form'] = form
 
         dicionario['id'] = variavel
@@ -256,7 +263,7 @@ def log_in(request):
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
 
-
+@login_required
 def logout(request):
     auth_logout(request)
     return redirect('/registro/login')
@@ -333,3 +340,51 @@ def upload(request):
                     return render(request, 'upload.html', {'result': result})
 
             return render(request, 'upload.html', {'result': result})
+
+@login_required
+def anexo(request, id):
+    dicionario = {}
+    erro = None
+    form = Cadastro.objects.get(pk=id)
+    if request.method == 'POST':
+        fotos = request.FILES.getlist('imagens')
+        for img in fotos:
+            imagem = Imagem.objects.create(cadastro=form, imagem=img)
+        return render(request, 'anexo.html', {'sucesso': True})
+    elif request.method == 'GET':
+        form2 = Cadastro_imagem_Form(instance=form)
+        dicionario['form'] = form2
+        dicionario['cadastro'] = [form]
+        return render(request, 'anexo.html', dicionario)
+
+'''
+        requerente = request.POST.get('requerente')
+        assunto = request.POST.get('assunto')
+        numero_do_processo = request.POST.get('numero_do_processo')
+        ano = request.POST.get('ano')
+        data_do_processo = corrigi_data(request.POST.get('data_do_processo'))
+        data_do_recebimento = corrigi_data(request.POST.get('data_do_recebimento'))
+        responsavel = request.POST.get('responsavel')
+        status = request.POST.get('status')
+        destino = request.POST.get('destino')
+        imagens = request.FILES.getlist('imagens')
+        pessoa = Cadastro(requerente=requerente,
+                          assunto=assunto,
+                          numero_do_processo=numero_do_processo,
+                          ano=ano,
+                          data_do_processo=data_do_processo,
+                          data_do_recebimento=data_do_recebimento,
+                          responsavel=responsavel,
+                          status=status,
+                          destino=destino)
+        pessoa.save()
+        for imagem in imagens:
+            foto = Imagem(imagem=imagem)
+            foto.save()
+            pessoa.imagens.add(foto)
+        return render(request, 'anexo.html', {'sucesso':True})
+    else:
+        meuobjeto = Cadastro.objects.get(pk=id)
+        form = Cadastro_imagem_Form(instance=meuobjeto)
+        return render(request, 'anexo.html', {'form': form})
+        '''

@@ -31,6 +31,7 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
+                        <th scope="col"></th>
                         <th scope="col">Requerente</th>
                         <th scope="col">Assunto</th>
                         <th scope="col">Nº Processo</th>
@@ -44,16 +45,17 @@
                 </thead>
                 <tbody>
                     {% for result in results %}
-                        <tr id={{ result.id  }} data-href="{% url 'editar_cadastro' result.id %}" >
-                            <td >{{ result.requerente }}</td>
-                            <td>{{ result.assunto }}</td>
-                            <td>{{ result.numero_do_processo }}</td>
-                            <td>{{ result.ano }}</td>
-                            <td>{{ result.data_do_processo }}</td>
-                            <td>{{ result.data_do_recebimento }}</td>
-                            <td>{{ result.responsavel }}</td>
-                            <td>{{ result.status }}</td>
-                            <td>{{ result.destino }}</td>
+                        <tr >
+                            <td data-href="{% url 'anexo' result.id %}"><i class="fas fa-paperclip" ></i></td>
+                            <td data-href="{% url 'editar_cadastro' result.id %}">{{ result.requerente }}</td>
+                            <td data-href="{% url 'editar_cadastro' result.id %}">{{ result.assunto }}</td>
+                            <td data-href="{% url 'editar_cadastro' result.id %}">{{ result.numero_do_processo }}</td>
+                            <td data-href="{% url 'editar_cadastro' result.id %}">{{ result.ano }}</td>
+                            <td data-href="{% url 'editar_cadastro' result.id %}">{{ result.data_do_processo }}</td>
+                            <td data-href="{% url 'editar_cadastro' result.id %}">{{ result.data_do_recebimento }}</td>
+                            <td data-href="{% url 'editar_cadastro' result.id %}">{{ result.responsavel }}</td>
+                            <td data-href="{% url 'editar_cadastro' result.id %}">{{ result.status }}</td>
+                            <td data-href="{% url 'editar_cadastro' result.id %}">{{ result.destino }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -63,13 +65,13 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
             $(document).ready(function() {
-                $('tr').click(function() {
+                $('td').click(function() {
                     var id = $(this).attr('id');
                     console.log('ID da linha selecionada: ' + id);
                 });
             });
 
-            var linhasTabela = document.querySelectorAll('table tr');
+            var linhasTabela = document.querySelectorAll('table td');
 
               // Adiciona um evento de clique para cada linha da tabela
               linhasTabela.forEach(function(linha) {
