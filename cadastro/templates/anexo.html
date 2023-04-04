@@ -2,28 +2,113 @@
 
 {% block content %}
 
+<style>
+#modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.9);
+      }
+
+      #modal-imagem {
+        margin: auto;
+        display: block;
+        max-width: 80%;
+        max-height: 80%;
+      }
+
+      #modal-fechar {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+
+      #modal-fechar:hover,
+      #modal-fechar:focus {
+        color: #bbb;
+        text-decoration: none;
+        cursor: pointer;
+      }
+</style>
+
 {% if sucesso %}
     <div class="alert alert-success" role="alert">
-        Salvo com sucesso!!
+        Operação efetuada com sucesso!!
     </div>
 {% endif %}
 
-
+{% for cad in cadastro %}
+    <h3>{{ cad.requerente}} </h3>
+{% endfor %}
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    {% if not sucesso %}
-        <button type="submit">Salvar</button>
-    {% endif %}
+    <button type="submit" class="btn btn-primary">Salvar</button>
+
 </form>
+<form method="POST" action="{% url 'delete_images' id=id %}">
+    {% csrf_token %}
+    <div class="container">
+        <div class="row">
+            {% for cad in cadastro %}
+            {% for imagem in cad.imagem_set.all %}
+            <div class="col-md-3">
+                <input class="form-check-input" type="checkbox" name="imagens[]" value="{{ imagem.id }}" id="defaultCheck1">
+                <img src="{{ imagem.imagem.url }}" alt="Imagem"  style="width: 200px; height: 200px;"onclick="abrirImagem('{{ imagem.imagem.url }}')">
+            </div>
+            {% if forloop.counter|divisibleby:4 and not forloop.last %}
+        </div>
+        <div class="row">
+            {% endif %}
+            {% endfor %}
+            {% endfor %}
+            <!-- O modal -->
+            <div id="modal">
+                <!-- Fechar o modal com um "x" no canto superior direito -->
+                <span id="modal-fechar" onclick="fecharImagem()">&times;</span>
 
- {% for cad in cadastro %}
-    <h2>{{ cad.requerente }}</h2>
-    {% for imagem in cad.imagem_set.all %}
-        <img src="{{ imagem.imagem.url }}" alt="Imagem">
-    {% endfor %}
-{% endfor %}
+                <!-- A imagem em si -->
+                <img id="modal-imagem">
+            </div>
 
+            </div>
+        </div>
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir?')">Excluir selecionadas</button>
+    </form>
+<script>
+// Função para abrir a imagem no modal
+      function abrirImagem(caminhoImagem) {
+        // Obtenha o modal
+        var modal = document.getElementById("modal");
+
+        // Obtenha a imagem e defina o caminho da imagem grande
+        var modalImg = document.getElementById("modal-imagem");
+        modalImg.src = caminhoImagem;
+
+        // Exiba o modal
+        modal.style.display = "block";
+      }
+
+      // Função para fechar o modal
+      function fecharImagem() {
+        // Obtenha o modal
+        var modal = document.getElementById("modal");
+
+        // Oculte o modal
+        modal.style.display = "none";
+      }
+</script>
    <p style="line-height: 5;">&nbsp; </p>
 
 {% endblock %}

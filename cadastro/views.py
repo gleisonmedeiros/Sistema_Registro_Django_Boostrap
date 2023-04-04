@@ -1,7 +1,9 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseNotFound
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
+import os
 from .forms import CadastroForm, \
     Pesquisaform, \
     Dataform, \
@@ -343,48 +345,45 @@ def upload(request):
 
 @login_required
 def anexo(request, id):
+
     dicionario = {}
-    erro = None
+    dicionario['id']=id
+    dicionario['sucesso'] = None
     form = Cadastro.objects.get(pk=id)
+    form2 = Cadastro_imagem_Form(instance=form)
+    dicionario['form'] = form2
+    dicionario['cadastro'] = [form]
     if request.method == 'POST':
         fotos = request.FILES.getlist('imagens')
         for img in fotos:
             imagem = Imagem.objects.create(cadastro=form, imagem=img)
-        return render(request, 'anexo.html', {'sucesso': True})
+            dicionario['sucesso'] = True
+        return render(request, 'anexo.html',dicionario)
     elif request.method == 'GET':
-        form2 = Cadastro_imagem_Form(instance=form)
-        dicionario['form'] = form2
-        dicionario['cadastro'] = [form]
         return render(request, 'anexo.html', dicionario)
 
-'''
-        requerente = request.POST.get('requerente')
-        assunto = request.POST.get('assunto')
-        numero_do_processo = request.POST.get('numero_do_processo')
-        ano = request.POST.get('ano')
-        data_do_processo = corrigi_data(request.POST.get('data_do_processo'))
-        data_do_recebimento = corrigi_data(request.POST.get('data_do_recebimento'))
-        responsavel = request.POST.get('responsavel')
-        status = request.POST.get('status')
-        destino = request.POST.get('destino')
-        imagens = request.FILES.getlist('imagens')
-        pessoa = Cadastro(requerente=requerente,
-                          assunto=assunto,
-                          numero_do_processo=numero_do_processo,
-                          ano=ano,
-                          data_do_processo=data_do_processo,
-                          data_do_recebimento=data_do_recebimento,
-                          responsavel=responsavel,
-                          status=status,
-                          destino=destino)
-        pessoa.save()
-        for imagem in imagens:
-            foto = Imagem(imagem=imagem)
-            foto.save()
-            pessoa.imagens.add(foto)
-        return render(request, 'anexo.html', {'sucesso':True})
-    else:
-        meuobjeto = Cadastro.objects.get(pk=id)
-        form = Cadastro_imagem_Form(instance=meuobjeto)
-        return render(request, 'anexo.html', {'form': form})
-        '''
+
+def delete_images(request, id):
+    url = reverse('anexo', kwargs={'id': id})
+    if request.method == 'POST':
+        # Obter a lista de IDs de imagem selecionados
+        imagens_ids = request.POST.getlist('imagens[]')
+        print(id)
+        print(imagens_ids)
+        cadastro = get_object_or_404(Cadastro, pk=id)
+        for i in imagens_ids:
+            imagem = get_object_or_404(Imagem, pk=i, cadastro=cadastro)
+            print(imagem.imagem)
+            temp = imagem.imagem.path
+            imagem.delete()
+            os.remove(temp)
+
+        # Excluir cada imagem do banco de dados
+        #Imagem.objects.filter(id__in=imagens_ids).delete()
+
+        # Redirecionar de volta para a página de exibição de imagens
+
+        return HttpResponseRedirect(url)
+
+    # Se a solicitação não for uma solicitação POST, redirecione de volta para a página de exibição de imagens
+    return HttpResponseRedirect(url)
