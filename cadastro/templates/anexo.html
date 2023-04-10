@@ -51,21 +51,35 @@
 {% for cad in cadastro %}
     <h3>{{ cad.requerente}} </h3>
 {% endfor %}
+
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Salvar</button>
-
 </form>
+
 <form method="POST" action="{% url 'delete_images' id=id %}">
     {% csrf_token %}
     <div class="container">
         <div class="row">
             {% for cad in cadastro %}
-            {% for imagem in cad.imagem_set.all %}
+            {% for img in cad.imagem_set.all %}
             <div class="col-md-3">
-                <input class="form-check-input" type="checkbox" name="imagens[]" value="{{ imagem.id }}" id="defaultCheck1">
-                <img src="{{ imagem.imagem.url }}" alt="Imagem"  style="width: 200px; height: 200px;"onclick="abrirImagem('{{ imagem.imagem.url }}')">
+                <input class="form-check-input" type="checkbox" name="imagens[]" value="{{ img.id }}" id="defaultCheck1">
+                {% if img.imagem %}
+                    <img src="{{ img.imagem.url }}" alt="Imagem"  style="width: 200px; height: 200px;"onclick="abrirImagem('{{ img.imagem.url }}')">
+                {% else %}
+
+                    <a href="{{ img.pdf.url }}" target="_blank">
+                        <img src="/media/pdf/padrao_pdf.jpg" alt="{{ img.pdf }}" style="width: 100px; height: 100px;">
+                        <figcaption id="pdf_name_{{ img.id }}"></figcaption>
+                        <script>
+                            var pdf_url = "{{ img.pdf }}";
+                            var pdf_name = pdf_url.replace("pdf/", "");
+                            document.getElementById("pdf_name_{{ img.id }}").innerHTML = pdf_name;
+                        </script>
+                    </a>
+                {% endif %}
             </div>
             {% if forloop.counter|divisibleby:4 and not forloop.last %}
         </div>
@@ -84,6 +98,7 @@
 
             </div>
         </div>
+    <p style="line-height: 1;">&nbsp; </p>
     <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir?')">Excluir selecionadas</button>
     </form>
 <script>

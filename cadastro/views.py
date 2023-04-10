@@ -355,15 +355,24 @@ def anexo(request, id):
     dicionario['cadastro'] = [form]
     if request.method == 'POST':
         fotos = request.FILES.getlist('imagens')
+        pdf = request.FILES.getlist('pdf')
         for img in fotos:
-            imagem = Imagem.objects.create(cadastro=form, imagem=img)
+            print("entrei em imagens")
+            imagem = Imagem.objects.create(cadastro=form, imagem=img, pdf=None)
             dicionario['sucesso'] = True
+
+        for arq in pdf:
+            print("entrei em PDF")
+            arquivo = Imagem.objects.create(cadastro=form, pdf=arq, imagem=None)
+            dicionario['sucesso'] = True
+
         return render(request, 'anexo.html',dicionario)
     elif request.method == 'GET':
         return render(request, 'anexo.html', dicionario)
 
-
+# DELETA AS IMAGENS MARCADAS NO CHECKBOX
 def delete_images(request, id):
+    # SALVA URL DA VIEW ANEXO ACRESCENTANDO O ID
     url = reverse('anexo', kwargs={'id': id})
     if request.method == 'POST':
         # Obter a lista de IDs de imagem selecionados
@@ -374,16 +383,13 @@ def delete_images(request, id):
         for i in imagens_ids:
             imagem = get_object_or_404(Imagem, pk=i, cadastro=cadastro)
             print(imagem.imagem)
-            temp = imagem.imagem.path
+            try:
+                temp = imagem.imagem.path
+            except:
+                temp = imagem.pdf.path
             imagem.delete()
             os.remove(temp)
 
-        # Excluir cada imagem do banco de dados
-        #Imagem.objects.filter(id__in=imagens_ids).delete()
-
-        # Redirecionar de volta para a página de exibição de imagens
-
         return HttpResponseRedirect(url)
 
-    # Se a solicitação não for uma solicitação POST, redirecione de volta para a página de exibição de imagens
     return HttpResponseRedirect(url)

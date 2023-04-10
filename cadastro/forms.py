@@ -42,6 +42,8 @@ class CadastroForm(forms.ModelForm):
 class Cadastro_imagem_Form(forms.ModelForm):
     imagens = forms.ImageField(required=False,
                                widget=ClearableFileInput(attrs={'multiple': True, 'class': 'form-control w-50'}))
+    pdf = forms.FileField(required=False,
+                               widget=ClearableFileInput(attrs={'multiple': True, 'class': 'form-control w-50'}))
 
     class Meta:
 
@@ -65,6 +67,7 @@ class Cadastro_imagem_Form(forms.ModelForm):
             dicionario[i] = css1
 
         fields.append('imagens')
+        fields.append('pdf')
 
         css1 = forms.TextInput(attrs={
             'type': 'text', 'class': 'form-control w-50'})
