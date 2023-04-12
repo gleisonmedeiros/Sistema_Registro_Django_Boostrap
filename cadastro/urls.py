@@ -15,5 +15,6 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('upload/', views.upload, name='upload'),
     path('anexo/<int:id>/', views.anexo, name='anexo'),
-    path('delete_images/<int:id>/', views.delete_images, name='delete_images')
+    path('delete_images/<int:id>/', views.delete_images, name='delete_images'),
+    path('teste/', views.teste, name='teste')
 ]

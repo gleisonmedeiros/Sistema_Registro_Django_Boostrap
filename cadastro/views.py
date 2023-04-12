@@ -393,3 +393,8 @@ def delete_images(request, id):
         return HttpResponseRedirect(url)
 
     return HttpResponseRedirect(url)
+
+def teste(request):
+    if request.method == 'GET':
+        return render(request, 'teste.html')
+

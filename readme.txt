@@ -10,4 +10,8 @@ Este sistema possui:
     - Por Data
     - Por Numero
 
+Upload
+    - Imagem
+    - PDF
+
 - Importação da planilha com os dados para popular o banco.
