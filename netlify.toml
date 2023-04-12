@@ -1,0 +1,4 @@
+[[redirects]]
+from = "/*"
+to = "/registro/login/"
+status = 200
