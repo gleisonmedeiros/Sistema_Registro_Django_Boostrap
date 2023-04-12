@@ -1,0 +1,1 @@
+web: gunicorn myproject.wsgi --workers $GUNICORN_WORKERS --bind $GUNICORN_BIND
