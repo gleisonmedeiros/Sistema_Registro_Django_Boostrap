@@ -1,4 +1,4 @@
-Sistema de cadastro de registro feito em Python com Biblioteca Django com Bootstrap
+Sistema WEB de cadastro de registro feito em Python com Biblioteca Django com Bootstrap
 
 Este sistema possui:
 
